@@ -2,6 +2,7 @@ import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 import iziToast from "izitoast";
 import "izitoast/dist/css/iziToast.min.css";
+import axios from "axios";
 
 const formImg = document.querySelector('.form');
 const pictures = document.querySelector('.gallery');
@@ -14,7 +15,7 @@ const modal = new SimpleLightbox('.gallery a', {
   captionsPosition: 'bottom',
 });
 
-function fetchUsers(q) {
+async function fetchUsers(q) {
   const API_KEY = '42086416-f15f3f0137ece30b1354f2d54';
   const PARAMS = new URLSearchParams({
     key: API_KEY,
@@ -27,36 +28,37 @@ function fetchUsers(q) {
   const BASE_URL = 'https://pixabay.com/api';
   const url = `${BASE_URL}/?${PARAMS}`;
  
-   return fetch(url).then(response => {
+    const response = await axios.get(url, PARAMS);
+    console.log(response);
+    console.log(response.data.hits);
     if (!response.ok) {
       throw new Error(response.status);
-    };
-    return response.json();
-  });
+    }
+    return response.data.hits;   
  }
  
 formImg.addEventListener('submit', subValue);
 
-function subValue(ent) {
-  ent.preventDefault();
-  loader.classList.remove('is-hidden');
-  pictures.innerHTML = '';
-  const serchValue = ent.currentTarget.elements.title.value.trim();  
-  fetchUsers(serchValue).then(response => {
-    if (response.hits.length === 0) {
-      iziToast.error({
-        position: 'center',
-        title: 'Error',
-        message: 'Sorry, there are no images matching your search query. Please try again!',
-      });
-    }
-    pictures.innerHTML = markUp(response.hits);
-    modal.refresh();
-  })
-  .catch(error => console.log(error))
-  .finally(() => {
-    loader.classList.add('is-hidden'); 
-  })
+async function subValue(ent) {
+    ent.preventDefault();
+    loader.classList.remove('is-hidden');
+    pictures.innerHTML = '';    
+    const serchValue = ent.currentTarget.elements.title.value.trim();
+    console.log(serchValue);
+    const arr = await fetchUsers(serchValue);
+    console.log(arr);
+    try {
+       const arr = await fetchUsers(serchValue)
+        pictures.innerHTML = markUp(arr);
+        modal.refresh();
+        loader.classList.add('is-hidden'); 
+    } catch(error) {
+        iziToast.error({
+            position: 'center',
+            title: 'Error',
+            message: 'Sorry, there are no images matching your search query. Please try again!',
+        })
+    }      
 }
 
 function markUp(arr) {
@@ -85,3 +87,49 @@ function markUp(arr) {
  .join(""); 
 }
  
+
+/// *************
+// function fetchUsers(q) {
+//   const API_KEY = '42086416-f15f3f0137ece30b1354f2d54';
+//   const PARAMS = new URLSearchParams({
+//     key: API_KEY,
+//     q,
+//     image_type: 'photo',
+//     orientation: 'horizontal',
+//     safesearch: true,
+//   });
+
+//   const BASE_URL = 'https://pixabay.com/api';
+//   const url = `${BASE_URL}/?${PARAMS}`;
+ 
+//    return fetch(url).then(response => {
+//     if (!response.ok) {
+//       throw new Error(response.status);
+//     };
+//     return response.json();
+//   });
+//  }
+ 
+// formImg.addEventListener('submit', subValue);
+
+// function subValue(ent) {
+//   ent.preventDefault();
+//   loader.classList.remove('is-hidden');
+//   pictures.innerHTML = '';
+//   const serchValue = ent.currentTarget.elements.title.value.trim();  
+//   fetchUsers(serchValue).then(response => {
+//     if (response.hits.length === 0) {
+//       iziToast.error({
+//         position: 'center',
+//         title: 'Error',
+//         message: 'Sorry, there are no images matching your search query. Please try again!',
+//       });
+//     }
+//     pictures.innerHTML = markUp(response.hits);
+//     modal.refresh();
+//   })
+//   .catch(error => console.log(error))
+//   .finally(() => {
+//     loader.classList.add('is-hidden'); 
+//   })
+// }
