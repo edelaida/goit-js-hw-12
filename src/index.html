@@ -9,11 +9,26 @@
   <body>
     <form class="form">
       <input type="text" name="title" placeholder="Search images..." />
-      <button class="btn" type="submit">Search</button>
+      <button class="sub" type="submit">Search</button>
     </form>
     <ul class="gallery"></ul>
 
-    <div class="loader is-hidden"></div>
+    <!-- <div class="loader is-hidden"></div> -->
+
+    <button
+      disabled
+      type="button"
+      class="btn btn-primary button js-btn-load"
+      data-action="load-more"
+    >
+      <span
+        class="js-loader spinner-border spinner-border-sm spinner is-hidden"
+        role="status"
+        aria-hidden="true"
+        >Load more</span
+      >
+      <!-- <span class="label">Load more</span> -->
+    </button>
 
     <script type="module" src="./main.js"></script>
   </body>

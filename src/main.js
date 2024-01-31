@@ -6,7 +6,8 @@ import axios from "axios";
 
 const formImg = document.querySelector('.form');
 const pictures = document.querySelector('.gallery');
-const loader = document.querySelector('.loader');
+const btnLoadMore = document.querySelector('.js-btn-load')
+const loadElem = document.querySelector('.js-loader');
 
 const modal = new SimpleLightbox('.gallery a', {
   captionsData: "alt",
@@ -14,6 +15,12 @@ const modal = new SimpleLightbox('.gallery a', {
   captionDelay: 250,
   captionsPosition: 'bottom',
 });
+
+let page = 1;
+let limit = 30;
+let totalResults = 100;
+let maxPage = 0;
+let serchValue = '';
 
 async function fetchUsers(q) {
   const API_KEY = '42086416-f15f3f0137ece30b1354f2d54';
@@ -23,35 +30,31 @@ async function fetchUsers(q) {
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: true,
+    page: page,
+      per_page: limit,
   });
-
   const BASE_URL = 'https://pixabay.com/api';
-  const url = `${BASE_URL}/?${PARAMS}`;
- 
-    const response = await axios.get(url, PARAMS);
-    console.log(response);
-    console.log(response.data.hits);
-    if (!response.ok) {
-      throw new Error(response.status);
-    }
+  const url = `${BASE_URL}/?${PARAMS}`; 
+    const response = await axios.get(url, PARAMS);    
     return response.data.hits;   
  }
  
 formImg.addEventListener('submit', subValue);
+btnLoadMore.addEventListener('click', onLoadMore);
 
 async function subValue(ent) {
-    ent.preventDefault();
-    loader.classList.remove('is-hidden');
+    ent.preventDefault();   
     pictures.innerHTML = '';    
-    const serchValue = ent.currentTarget.elements.title.value.trim();
-    console.log(serchValue);
-    const arr = await fetchUsers(serchValue);
-    console.log(arr);
-    try {
-       const arr = await fetchUsers(serchValue)
-        pictures.innerHTML = markUp(arr);
+        
+  try {
+       serchValue = ent.currentTarget.elements.title.value.trim();
+    const arr = await fetchUsers(serchValue)
+       pictures.innerHTML = markUp(arr);
         modal.refresh();
-        loader.classList.add('is-hidden'); 
+        hideLoader();
+    changeBtnStatus();
+    ent.target.reset();
+       
     } catch(error) {
         iziToast.error({
             position: 'center',
@@ -59,6 +62,28 @@ async function subValue(ent) {
             message: 'Sorry, there are no images matching your search query. Please try again!',
         })
     }      
+}
+
+async function onLoadMore() {
+  page += 1;
+  showLoader();
+  const arr = await fetchUsers(serchValue)
+  pictures.insertAdjacentHTML('beforeend', markUp(arr));
+  modal.refresh();
+    hideLoader();
+  changeBtnStatus();
+}
+
+function changeBtnStatus() {
+   maxPage = Math.ceil(totalResults / limit);
+    btnLoadMore.disabled = page >= maxPage;
+}
+
+function showLoader() {
+  loadElem.classList.remove('is-hidden');
+}
+function hideLoader() {
+  loadElem.classList.add('is-hidden');
 }
 
 function markUp(arr) {
@@ -86,50 +111,4 @@ function markUp(arr) {
 })
  .join(""); 
 }
- 
 
-/// *************
-// function fetchUsers(q) {
-//   const API_KEY = '42086416-f15f3f0137ece30b1354f2d54';
-//   const PARAMS = new URLSearchParams({
-//     key: API_KEY,
-//     q,
-//     image_type: 'photo',
-//     orientation: 'horizontal',
-//     safesearch: true,
-//   });
-
-//   const BASE_URL = 'https://pixabay.com/api';
-//   const url = `${BASE_URL}/?${PARAMS}`;
- 
-//    return fetch(url).then(response => {
-//     if (!response.ok) {
-//       throw new Error(response.status);
-//     };
-//     return response.json();
-//   });
-//  }
- 
-// formImg.addEventListener('submit', subValue);
-
-// function subValue(ent) {
-//   ent.preventDefault();
-//   loader.classList.remove('is-hidden');
-//   pictures.innerHTML = '';
-//   const serchValue = ent.currentTarget.elements.title.value.trim();  
-//   fetchUsers(serchValue).then(response => {
-//     if (response.hits.length === 0) {
-//       iziToast.error({
-//         position: 'center',
-//         title: 'Error',
-//         message: 'Sorry, there are no images matching your search query. Please try again!',
-//       });
-//     }
-//     pictures.innerHTML = markUp(response.hits);
-//     modal.refresh();
-//   })
-//   .catch(error => console.log(error))
-//   .finally(() => {
-//     loader.classList.add('is-hidden'); 
-//   })
-// }
