@@ -4,6 +4,7 @@ import iziToast from "izitoast";
 import "izitoast/dist/css/iziToast.min.css";
 import axios from "axios";
 
+
 const formImg = document.querySelector('.form');
 const pictures = document.querySelector('.gallery');
 const btnLoadMore = document.querySelector('.js-btn-load')
@@ -45,10 +46,11 @@ btnLoadMore.addEventListener('click', onLoadMore);
 async function subValue(ent) {
     ent.preventDefault();   
     pictures.innerHTML = '';    
-        
+      page = 1;
+  serchValue = '';
   try {
        serchValue = ent.currentTarget.elements.title.value.trim();
-    const arr = await fetchUsers(serchValue)
+      const arr = await fetchUsers(serchValue)
        pictures.innerHTML = markUp(arr);
         modal.refresh();
         hideLoader();
@@ -76,7 +78,18 @@ async function onLoadMore() {
 
 function changeBtnStatus() {
    maxPage = Math.ceil(totalResults / limit);
-    btnLoadMore.disabled = page >= maxPage;
+  //btnLoadMore.disabled = page >= maxPage;
+  if (page >= maxPage) {
+    btnLoadMore.disabled = true;
+    iziToast.error({
+            position: 'bottomLeft',
+            title: 'We are sorry',
+            message: 'but you ve reached the end of search results.',
+        })
+  } else {
+    btnLoadMore.disabled = false;
+  }
+
 }
 
 function showLoader() {
