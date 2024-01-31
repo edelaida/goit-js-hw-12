@@ -50,22 +50,18 @@ async function handleSubmit(ent) {
   serchValue = '';
   try {
     serchValue = ent.currentTarget.elements.title.value.trim();
-    if (serchValue === '') {
-      iziToast.show({
+    
+    if (!serchValue) {
+      return iziToast.show({
         message: `Please enter name to search`,
         position: 'topRight',
         backgroundColor: 'red',
         messageColor: 'white',
-      });
-      formImg.disabled = true;
+      });      
     }
-    else {
-      formImg.disabled = false;
-    }
-    
-      const arr = await fetchUsers(serchValue)
-   
-    
+      
+    const arr = await fetchUsers(serchValue)
+      
     if (arr.length === 0) {
      iziToast.error({
             position: 'center',
