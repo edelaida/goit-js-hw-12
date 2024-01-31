@@ -49,8 +49,22 @@ async function handleSubmit(ent) {
       page = 1;
   serchValue = '';
   try {
-       serchValue = ent.currentTarget.elements.title.value.trim();
-    const arr = await fetchUsers(serchValue)
+    serchValue = ent.currentTarget.elements.title.value.trim();
+    if (serchValue === '') {
+      iziToast.show({
+        message: `Please enter name to search`,
+        position: 'topRight',
+        backgroundColor: 'red',
+        messageColor: 'white',
+      });
+      formImg.disabled = true;
+    }
+    else {
+      formImg.disabled = false;
+    }
+    
+      const arr = await fetchUsers(serchValue)
+   
     
     if (arr.length === 0) {
      iziToast.error({
@@ -90,14 +104,14 @@ async function onLoadMore() {
 function changeBtnStatus() {
   maxPage = Math.ceil(totalResults / limit);
   if (page >= maxPage) {
-    btnLoadMore.disabled = true;
+    btnLoadMore.classList.add('is-hidden');
     iziToast.error({
             position: 'bottomLeft',
             title: 'We are sorry',
             message: 'but you ve reached the end of search results.',
         })
   } else {
-    btnLoadMore.disabled = false;
+    btnLoadMore.classList.remove('is-hidden');
   }
 }
 
