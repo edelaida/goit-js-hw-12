@@ -4,7 +4,6 @@ import iziToast from "izitoast";
 import "izitoast/dist/css/iziToast.min.css";
 import axios from "axios";
 
-
 const formImg = document.querySelector('.form');
 const pictures = document.querySelector('.gallery');
 const btnLoadMore = document.querySelector('.js-btn-load')
@@ -18,8 +17,8 @@ const modal = new SimpleLightbox('.gallery a', {
 });
 
 let page = 1;
-let limit = 30;
-let totalResults = 100;
+let limit = 40;
+let totalResults = 0;
 let maxPage = 0;
 let serchValue = '';
 
@@ -36,25 +35,37 @@ async function fetchUsers(q) {
   });
   const BASE_URL = 'https://pixabay.com/api';
   const url = `${BASE_URL}/?${PARAMS}`; 
-    const response = await axios.get(url, PARAMS);    
+  const response = await axios.get(url, PARAMS);  
+   totalResults = response.data.totalHits;        
     return response.data.hits;   
  }
  
-formImg.addEventListener('submit', subValue);
+formImg.addEventListener('submit', handleSubmit);
 btnLoadMore.addEventListener('click', onLoadMore);
 
-async function subValue(ent) {
+async function handleSubmit(ent) {
     ent.preventDefault();   
     pictures.innerHTML = '';    
       page = 1;
   serchValue = '';
   try {
        serchValue = ent.currentTarget.elements.title.value.trim();
-      const arr = await fetchUsers(serchValue)
-       pictures.innerHTML = markUp(arr);
+    const arr = await fetchUsers(serchValue)
+    
+    if (arr.length === 0) {
+     iziToast.error({
+            position: 'center',
+            title: 'Error',
+            message: 'Sorry, there are no images matching your search query. Please try again!',
+     })
+      btnLoadMore.classList.add('is-hidden');
+    } else {
+      pictures.innerHTML = markUp(arr);
+      btnLoadMore.classList.remove('is-hidden');
+   }        
         modal.refresh();
         hideLoader();
-    changeBtnStatus();
+    changeBtnStatus(arr);
     ent.target.reset();
        
     } catch(error) {
@@ -77,8 +88,7 @@ async function onLoadMore() {
 }
 
 function changeBtnStatus() {
-   maxPage = Math.ceil(totalResults / limit);
-  //btnLoadMore.disabled = page >= maxPage;
+  maxPage = Math.ceil(totalResults / limit);
   if (page >= maxPage) {
     btnLoadMore.disabled = true;
     iziToast.error({
@@ -89,7 +99,6 @@ function changeBtnStatus() {
   } else {
     btnLoadMore.disabled = false;
   }
-
 }
 
 function showLoader() {

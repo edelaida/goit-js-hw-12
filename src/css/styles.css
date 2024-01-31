@@ -80,6 +80,7 @@
 }
 
 .form {
+  padding-top: 20px;
   display: flex;
   gap: 8px;
   justify-content: center;
@@ -108,4 +109,8 @@ input {
 
 .is-hidden {
   display: none;
+}
+.btn {
+  margin-top: 60px;
+  margin-left: 200px; 
 }
